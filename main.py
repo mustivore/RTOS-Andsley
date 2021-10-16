@@ -8,7 +8,7 @@ from UnitOfTime import UnitOfTime
 task1 = Task("T1", 100, 10, 20, 30)
 task2 = Task("T2", 50, 20, 50, 50)
 task3 = Task("T3", 0, 30, 100, 150)
-tasks = [task1, task2, task3]
+tasks = [task3, task1, task2]
 
 
 # function to calculate LCM of a tasks array
@@ -19,8 +19,8 @@ def lcm(tasksArray):
     return lcm
 
 
-def initialiseDeadlinePeriod(endOfFeasibilityInterval, tasksArray):
-    scheduleArray = [UnitOfTime() for i in range(endOfFeasibilityInterval+1)]
+def initialiseDeadlineAndPeriod(endOfFeasibilityInterval, tasksArray):
+    scheduleArray = [UnitOfTime() for i in range(endOfFeasibilityInterval + 1)]
     for task in tasksArray:
         previousPeriod = task.offset + task.period
         previousDeadline = task.offset + task.deadline
@@ -42,14 +42,23 @@ def scheduler(tasksArray):
     maxOffset = max(tasksArray, key=lambda t: t.offset).offset
     hyperPeriod = lcm(tasksArray)
     endOfFeasibilityInterval = maxOffset + (2 * hyperPeriod)
-    schedulerByTask = initialiseDeadlinePeriod(endOfFeasibilityInterval, tasksArray)
-    # for i in range(endOfFeasibilityInterval + 1):
-    #     for task in tasks:
-    #         if task.isReleased:
-    #
-    #             break
-    #     break
-    return schedulerByTask
+    schedulerArray = initialiseDeadlineAndPeriod(endOfFeasibilityInterval, tasksArray)
+    for i in range(endOfFeasibilityInterval + 1):
+        if i == 100:
+            print(i)
+        for task in schedulerArray[i].tasksPeriod:
+            task.executionTimeLeft = task.wcet
+            task.isReleased = True
+
+        for task in tasksArray:
+            if task.isReleased:
+                schedulerArray[i].setIsAssignedFor(task)
+                task.decreaseExecutionTimeLeft()
+                if task.executionTimeLeft == 0:
+                    task.isReleased = False
+                break
+
+    return schedulerArray
 
 
 print(scheduler(tasks))

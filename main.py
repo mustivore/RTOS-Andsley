@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 import math
 
 from Task import Task
@@ -44,10 +43,8 @@ def scheduler(tasksArray):
     endOfFeasibilityInterval = maxOffset + (2 * hyperPeriod)
     schedulerArray = initialiseDeadlineAndPeriod(endOfFeasibilityInterval, tasksArray)
     for i in range(endOfFeasibilityInterval + 1):
-        if i == 100:
-            print(i)
         for task in schedulerArray[i].tasksPeriod:
-            task.executionTimeLeft = task.wcet
+            task.executionTimeLeft += task.wcet
             task.isReleased = True
 
         for task in tasksArray:
@@ -57,8 +54,18 @@ def scheduler(tasksArray):
                 if task.executionTimeLeft == 0:
                     task.isReleased = False
                 break
-
+    plot(schedulerArray)
     return schedulerArray
 
 
-print(scheduler(tasks))
+def plot(schedulerArray):
+    fig, gnt = plt.subplots()
+    gnt.set_xlabel('Seconds since start')
+    gnt.set_ylabel('Tasks')
+    previousTask = None
+    for unitOfTime in schedulerArray:
+        if previousTask is None:
+            previousTask = unitOfTime.isAssignedFor
+
+
+scheduler(tasks)

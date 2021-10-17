@@ -1,13 +1,48 @@
 import matplotlib.pyplot as plt
 import math
-
+import sys
 from Task import Task
 from UnitOfTime import UnitOfTime
+import os.path
+import io
 
-task1 = Task("T1", 100, 10, 20, 30)
-task2 = Task("T2", 50, 20, 50, 50)
-task3 = Task("T3", 0, 30, 100, 150)
-tasks = [task3, task1, task2]
+
+# task1 = Task("T1", 100, 10, 20, 30)
+# task2 = Task("T2", 50, 20, 50, 50)
+# task3 = Task("T3", 0, 30, 100, 150)
+# tasks = [task3, task1, task2]
+
+
+def checkArgumentLine(length):
+    if length == 2 and sys.argv[1] == 'audsley':
+        return 'call audley function'
+    if length == 3 and sys.argv[1] == 'scheduler' and os.path.isfile(sys.argv[2]):
+        return scheduler(parseTextFileToTasksArray(sys.argv[2]))
+    else:
+        showUsageError()
+        return sys.exit()
+
+
+def showUsageError():
+    return 'usage error : to do '
+
+
+def parseTextFileToTasksArray(filename):
+    tasks = []
+    with io.open(filename, 'r', encoding='utf-8') as f:
+        task_index = 1
+        for line in f:
+            line_split = line.split()
+
+            if len(line_split) != 4:
+                print('wrong file format')
+                return sys.exit()
+
+            tasks.append(Task('T' + str(task_index), int(line_split[0]), int(line_split[1]),
+                              int(line_split[2]), int(line_split[3])))
+            task_index += 1
+
+    return tasks
 
 
 # function to calculate LCM of a tasks array
@@ -68,4 +103,9 @@ def plot(schedulerArray):
             previousTask = unitOfTime.isAssignedFor
 
 
-scheduler(tasks)
+def main():
+    print(checkArgumentLine(len(sys.argv)))
+
+
+if __name__ == "__main__":
+    main()

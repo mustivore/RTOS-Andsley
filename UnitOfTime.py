@@ -1,5 +1,6 @@
 class UnitOfTime:
-    def __init__(self):
+    def __init__(self, index):
+        self.index = index
         self.isAssignedFor = None
         self.tasksDeadline = set()
         self.tasksPeriod = set()

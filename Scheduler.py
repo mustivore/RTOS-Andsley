@@ -67,6 +67,10 @@ class Scheduler:
         previousTask = None
         start = 0
         for unitOfTime in self.schedulerArray:
+            for task in unitOfTime.tasksDeadlineMissed:
+                dl = plt.Circle((unitOfTime.index, 13 * task.number), 2, color='black')
+                gnt.add_patch(dl)
+
             currentTask = unitOfTime.isAssignedFor
             if previousTask is None:
                 previousTask = currentTask
@@ -76,7 +80,7 @@ class Scheduler:
                                 facecolors=previousTask.color)
                 start = unitOfTime.index
                 previousTask = currentTask
-
+        plt.legend(['Deadline missed'])
         plt.show()
 
     def assign_priority_audsley(self, testedTaskNumber, priorityAssignmentStack):

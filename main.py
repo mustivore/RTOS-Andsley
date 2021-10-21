@@ -21,7 +21,7 @@ def parseTextFileToTasksArray(filename):
                 print('wrong file format')
                 return sys.exit()
 
-            tasks.append(Task('T' + str(task_index), int(line_split[0]), int(line_split[1]),
+            tasks.append(Task(task_index, int(line_split[0]), int(line_split[1]),
                               int(line_split[2]), int(line_split[3])))
             task_index += 1
 
@@ -34,7 +34,6 @@ if __name__ == "__main__":
         print('call audley function')
     if length == 3 and sys.argv[1] == 'scheduler' and os.path.isfile(sys.argv[2]):
         tasks = parseTextFileToTasksArray(sys.argv[2])
-        tasks[len(tasks) - 1].typeOfDeadline = "hard"
         scheduler = Scheduler(tasks)
         scheduler.schedule()
         scheduler.plot()

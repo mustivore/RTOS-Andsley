@@ -14,18 +14,13 @@ class Scheduler:
         scheduleArray = [UnitOfTime(i) for i in range(endOfFeasibilityInterval + 1)]
         for task in self.tasks:
             previousPeriod = task.offset + task.period
-            previousDeadline = task.offset + task.deadline
             scheduleArray[task.offset].addNewTaskToPeriod(task)
             scheduleArray[task.offset + task.period].addNewTaskToPeriod(task)
-            scheduleArray[task.offset + task.deadline].addNewTaskToDeadline(task)
 
             for i in range(task.offset + 1, endOfFeasibilityInterval + 1):
                 if i - previousPeriod == task.period:
                     scheduleArray[i].addNewTaskToPeriod(task)
                     previousPeriod = i
-                if i - previousDeadline == task.deadline:
-                    scheduleArray[i].addNewTaskToDeadline(task)
-                    previousDeadline = i
         return scheduleArray
 
     def schedule(self):
@@ -33,32 +28,31 @@ class Scheduler:
         hyperPeriod = lcm(self.tasks)
         endOfFeasibilityInterval = maxOffset + (2 * hyperPeriod)
         self.schedulerArray = self.__initialiseDeadlineAndPeriod(endOfFeasibilityInterval)
-        hardDeadlineMissed = False
+
         i = 0
-        while i < endOfFeasibilityInterval and not hardDeadlineMissed:
-            for task in self.schedulerArray[i].tasksDeadline:
-                if task.executionTimeLeft != 0:
-                    if task.typeOfDeadline == 'hard':
-                        print(task.name, 'miss a hard deadline at time', i)
-                        hardDeadlineMissed = True
-                    else:
-                        print(task.name, 'miss a soft deadline at time', i)
-
-            if hardDeadlineMissed:
-                continue
-
+        while i < endOfFeasibilityInterval:
             for task in self.schedulerArray[i].tasksPeriod:
-                task.executionTimeLeft += task.wcet
+                task.createNewJob(i)
                 task.isReleased = True
 
             for task in self.tasks:
                 if task.isReleased:
+                    currentJob = task.getCurrentJob()
+                    if i == currentJob.deadline:
+                        self.schedulerArray[i].addNewTaskToDeadlineMissed(task)
+                        if task.typeOfDeadline == 'hard':
+                            print(task.name, 'miss a hard deadline at time', i)
+                            return False
+                        else:
+                            print(task.name, 'miss a soft deadline at time', i)
+
+            for task in self.tasks:
+                if task.isReleased:
                     self.schedulerArray[i].setIsAssignedFor(task)
-                    task.decreaseExecutionTimeLeft()
-                    if task.executionTimeLeft == 0:
-                        task.isReleased = False
+                    task.decreaseExecutionTimeOfTheCurrentJob()
                     break
             i += 1
+        return True
 
     def plot(self):
         colors = ['red', 'blue', 'green', 'yellow', 'orange']

@@ -7,10 +7,10 @@ from Scheduler import Scheduler
 
 
 def showUsageError():
-    return 'usage error : to do '
+    return 'usage error : main.py [audsley|scheduler] <task_file> '
 
 
-def parseTextFileToTasksArray(filename):
+def parseTextFileToTasksArray(filename, typeOfDeadline):
     tasks = []
     with io.open(filename, 'r', encoding='utf-8') as f:
         task_index = 1
@@ -22,21 +22,29 @@ def parseTextFileToTasksArray(filename):
                 return sys.exit()
 
             tasks.append(Task(task_index, int(line_split[0]), int(line_split[1]),
-                              int(line_split[2]), int(line_split[3])))
+                              int(line_split[2]), int(line_split[3]), typeOfDeadline))
             task_index += 1
 
     return tasks
 
 
 if __name__ == "__main__":
+
     length = len(sys.argv)
-    if length == 2 and sys.argv[1] == 'audsley':
-        print('call audley function')
-    if length == 3 and sys.argv[1] == 'scheduler' and os.path.isfile(sys.argv[2]):
-        tasks = parseTextFileToTasksArray(sys.argv[2])
-        scheduler = Scheduler(tasks)
-        scheduler.schedule()
-        scheduler.plot()
+
+    if length == 3 and os.path.isfile(sys.argv[2]):
+        if sys.argv[1] == 'audsley':
+            tasks = parseTextFileToTasksArray(sys.argv[2], 'soft')
+            scheduler = Scheduler(tasks)
+            scheduler.assign_priority_audsley(0, [])
+        elif sys.argv[1] == 'scheduler':
+            tasks = parseTextFileToTasksArray(sys.argv[2], 'hard')
+            scheduler = Scheduler(tasks)
+            scheduler.schedule()
+            scheduler.plot()
+        else:
+            print(showUsageError())
+            sys.exit(-1)
     else:
         print(showUsageError())
         sys.exit(-1)

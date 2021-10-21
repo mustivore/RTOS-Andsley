@@ -79,6 +79,42 @@ class Scheduler:
 
         plt.show()
 
+    def assign_priority_audsley(self, testedTaskNumber, priorityAssignmentStack):
+
+        if testedTaskNumber == len(self.tasks):
+            print("there is no lowest-priority viable task!!!")
+            return False
+
+        if len(self.tasks) == 1:
+            print("A FTP assignment has been found!!!")
+            priorityAssignmentStack.append(self.tasks[- 1])
+            f = open("audsley.txt", "w")
+
+            while priorityAssignmentStack:
+                task = priorityAssignmentStack.pop()
+                f.write(str(task.offset) + " " + str(task.wcet) + " " + str(task.deadline) + " " + str(
+                    task.period) + " " + "\n")
+            return True
+
+        print("Test lowest-priority viable task ", self.tasks[- 1].name)
+        self.tasks[-1].typeOfDeadline = "hard"
+
+        if self.schedule():
+            # scheduler return true so we need to remove a task
+            priorityAssignmentStack.append(self.tasks[- 1])
+            del self.tasks[- 1]
+            return self.assign_priority_audsley(0, priorityAssignmentStack)
+        else:
+            testedTaskNumber += 1
+            self.tasks[-1].typeOfDeadline = "soft"
+
+            # swap 2 tasks
+            temp = self.tasks[-1]
+            self.tasks[-1] = self.tasks[len(self.tasks) - testedTaskNumber - 1]
+            self.tasks[len(self.tasks) - testedTaskNumber - 1] = temp
+
+            return self.assign_priority_audsley(testedTaskNumber, priorityAssignmentStack)
+
 
 # function to calculate LCM of a tasks array
 def lcm(tasksArray):

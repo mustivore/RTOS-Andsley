@@ -2,6 +2,7 @@ import sys
 import os.path
 import io
 
+from Audsley import Audsley
 from Task import Task
 from Scheduler import Scheduler
 
@@ -35,8 +36,8 @@ if __name__ == "__main__":
     if length == 3 and os.path.isfile(sys.argv[2]):
         if sys.argv[1] == 'audsley':
             tasks = parseTextFileToTasksArray(sys.argv[2], 'soft')
-            scheduler = Scheduler(tasks)
-            scheduler.assign_priority_audsley(0, [])
+            audsley = Audsley(tasks)
+            audsley.assign_priority()
         elif sys.argv[1] == 'scheduler':
             tasks = parseTextFileToTasksArray(sys.argv[2], 'hard')
             scheduler = Scheduler(tasks)

@@ -1,6 +1,7 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import queue
 
 from UnitOfTime import UnitOfTime
 
@@ -8,37 +9,27 @@ from UnitOfTime import UnitOfTime
 class Scheduler:
     def __init__(self, tasks):
         self.tasks = tasks
-        self.schedulerArray = None
-
-    def __initialiseDeadlineAndPeriod(self, endOfFeasibilityInterval):
-        scheduleArray = [UnitOfTime(i) for i in range(endOfFeasibilityInterval + 1)]
-        for task in self.tasks:
-            previousPeriod = task.offset + task.period
-            scheduleArray[task.offset].addNewTaskToPeriod(task)
-            scheduleArray[task.offset + task.period].addNewTaskToPeriod(task)
-
-            for i in range(task.offset + 1, endOfFeasibilityInterval + 1):
-                if i - previousPeriod == task.period:
-                    scheduleArray[i].addNewTaskToPeriod(task)
-                    previousPeriod = i
-        return scheduleArray
-
-    def schedule(self):
+        self.jobQueue = queue.PriorityQueue()
+        self.jobsByTask = dict()
         maxOffset = max(self.tasks, key=lambda t: t.offset).offset
         hyperPeriod = lcm(self.tasks)
-        endOfFeasibilityInterval = maxOffset + (2 * hyperPeriod)
-        self.schedulerArray = self.__initialiseDeadlineAndPeriod(endOfFeasibilityInterval)
+        self.endOfFeasibilityInterval = maxOffset + (2 * hyperPeriod)
+        self.schedulerArray = [UnitOfTime(i) for i in range(self.endOfFeasibilityInterval)]
+        for task in tasks:
+            self.jobsByTask[task] = queue.Queue()
 
+    def schedule(self):
         i = 0
-        while i < endOfFeasibilityInterval:
-            for task in self.schedulerArray[i].tasksPeriod:
-                task.createNewJob(i)
-                task.isReleased = True
-
+        while i < self.endOfFeasibilityInterval:
             for task in self.tasks:
-                if task.isReleased:
-                    currentJob = task.getCurrentJob()
-                    if i == currentJob.deadline:
+                if ((i - task.offset) % task.period) == 0 and i >= task.offset:
+                    job = task.createNewJob(i)
+                    self.jobQueue.put(job)
+                    self.jobsByTask[task].put(job)
+
+                if not self.jobsByTask[task].empty():
+                    job = self.jobsByTask[task].queue[0]
+                    if i == job.deadline:
                         self.schedulerArray[i].addNewTaskToDeadlineMissed(task)
                         if task.typeOfDeadline == 'hard':
                             print(task.name, 'miss a hard deadline at time', i)
@@ -46,11 +37,13 @@ class Scheduler:
                         else:
                             print(task.name, 'miss a soft deadline at time', i)
 
-            for task in self.tasks:
-                if task.isReleased:
-                    self.schedulerArray[i].setIsAssignedFor(task)
-                    task.decreaseExecutionTimeOfTheCurrentJob()
-                    break
+            if not self.jobQueue.empty():
+                job = self.jobQueue.queue[0]
+                job.decreaseExecutionTime()
+                self.schedulerArray[i].setIsAssignedFor(job.task)
+                if job.executionTime == 0:
+                    self.jobQueue.get()
+                    self.jobsByTask[job.task].get()
             i += 1
         return True
 
@@ -66,58 +59,22 @@ class Scheduler:
         plt.xticks(np.arange(0, len(self.schedulerArray) + 1, 10))
         previousTask = None
         start = 0
-        for unitOfTime in self.schedulerArray:
-            for task in unitOfTime.tasksDeadlineMissed:
-                dl = plt.Circle((unitOfTime.index, 13 * task.number), 2, color='black')
+        while i < self.endOfFeasibilityInterval:
+            for task in self.schedulerArray[i].tasksDeadlineMissed:
+                dl = plt.Circle((self.schedulerArray[i].index, 13 * task.number), 2, color='black')
                 gnt.add_patch(dl)
 
-            currentTask = unitOfTime.isAssignedFor
+            currentTask = self.schedulerArray[i].isAssignedFor
             if previousTask is None:
                 previousTask = currentTask
-                start = unitOfTime.index
+                start = self.schedulerArray[i].index
             elif previousTask is not currentTask:
-                gnt.broken_barh([(start, unitOfTime.index - start)], (previousTask.number * 10, 7),
+                gnt.broken_barh([(start, self.schedulerArray[i].index - start)], (previousTask.number * 10, 7),
                                 facecolors=previousTask.color)
-                start = unitOfTime.index
+                start = self.schedulerArray[i].index
                 previousTask = currentTask
         plt.legend(['Deadline missed'])
         plt.show()
-
-    def assign_priority_audsley(self, testedTaskNumber, priorityAssignmentStack):
-
-        if testedTaskNumber == len(self.tasks):
-            print("there is no lowest-priority viable task!!!")
-            return False
-
-        if len(self.tasks) == 1:
-            print("A FTP assignment has been found!!!")
-            priorityAssignmentStack.append(self.tasks[- 1])
-            f = open("audsley.txt", "w")
-
-            while priorityAssignmentStack:
-                task = priorityAssignmentStack.pop()
-                f.write(str(task.offset) + " " + str(task.wcet) + " " + str(task.deadline) + " " + str(
-                    task.period) + " " + "\n")
-            return True
-
-        print("Test lowest-priority viable task ", self.tasks[- 1].name)
-        self.tasks[-1].typeOfDeadline = "hard"
-
-        if self.schedule():
-            # scheduler return true so we need to remove a task
-            priorityAssignmentStack.append(self.tasks[- 1])
-            del self.tasks[- 1]
-            return self.assign_priority_audsley(0, priorityAssignmentStack)
-        else:
-            testedTaskNumber += 1
-            self.tasks[-1].typeOfDeadline = "soft"
-
-            # swap 2 tasks
-            temp = self.tasks[-1]
-            self.tasks[-1] = self.tasks[len(self.tasks) - testedTaskNumber - 1]
-            self.tasks[len(self.tasks) - testedTaskNumber - 1] = temp
-
-            return self.assign_priority_audsley(testedTaskNumber, priorityAssignmentStack)
 
 
 # function to calculate LCM of a tasks array

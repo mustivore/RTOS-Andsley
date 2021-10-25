@@ -59,6 +59,7 @@ class Scheduler:
         plt.xticks(np.arange(0, len(self.schedulerArray) + 1, 10))
         previousTask = None
         start = 0
+        i = 0
         while i < self.endOfFeasibilityInterval:
             for task in self.schedulerArray[i].tasksDeadlineMissed:
                 dl = plt.Circle((self.schedulerArray[i].index, 13 * task.number), 2, color='black')
@@ -73,6 +74,7 @@ class Scheduler:
                                 facecolors=previousTask.color)
                 start = self.schedulerArray[i].index
                 previousTask = currentTask
+            i += 1
         plt.legend(['Deadline missed'])
         plt.show()
 

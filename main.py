@@ -36,8 +36,8 @@ if __name__ == "__main__":
     if length == 3 and os.path.isfile(sys.argv[2]):
         if sys.argv[1] == 'audsley':
             tasks = parseTextFileToTasksArray(sys.argv[2], 'soft')
-            audsley = Audsley(tasks)
-            audsley.assign_priority()
+            audsley = Audsley()
+            audsley.assign_priority(tasks)
         elif sys.argv[1] == 'scheduler':
             tasks = parseTextFileToTasksArray(sys.argv[2], 'hard')
             scheduler = Scheduler(tasks)

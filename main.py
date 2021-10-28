@@ -13,6 +13,7 @@ def showUsageError():
 
 def parseTextFileToTasksArray(filename, typeOfDeadline):
     tasks = []
+    utilization = 0
     with io.open(filename, 'r', encoding='utf-8') as f:
         task_index = 1
         for line in f:
@@ -21,11 +22,14 @@ def parseTextFileToTasksArray(filename, typeOfDeadline):
             if len(line_split) != 4:
                 print('wrong file format')
                 return sys.exit()
-
-            tasks.append(Task(task_index, int(line_split[0]), int(line_split[1]),
-                              int(line_split[2]), int(line_split[3]), typeOfDeadline))
+            task = Task(task_index, int(line_split[0]), int(line_split[1]),
+                        int(line_split[2]), int(line_split[3]), typeOfDeadline)
+            tasks.append(task)
+            utilization += task.wcet / task.period
             task_index += 1
-
+    if utilization > 1:
+        print("Utilization is greater than 1")
+        sys.exit(-1)
     return tasks
 
 

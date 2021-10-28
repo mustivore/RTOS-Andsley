@@ -12,8 +12,8 @@ class Task:
         self.deadline = deadline
         self.period = period
         self.typeOfDeadline = typeOfDeadline
-        self.isReleased = False
         self.color = color
+        self.priority = None
 
     def createNewJob(self, currentPeriod):
         self.nbJobCreated += 1

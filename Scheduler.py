@@ -15,8 +15,9 @@ class Scheduler:
         hyperPeriod = lcm(self.tasks)
         self.endOfFeasibilityInterval = maxOffset + (2 * hyperPeriod)
         self.schedulerArray = [UnitOfTime(i) for i in range(self.endOfFeasibilityInterval)]
-        for task in tasks:
-            self.jobsByTask[task] = queue.Queue()
+        for i in range(1, len(tasks) + 1):
+            self.tasks[i-1].priority = i
+            self.jobsByTask[self.tasks[i-1]] = queue.Queue()
 
     def schedule(self):
         i = 0

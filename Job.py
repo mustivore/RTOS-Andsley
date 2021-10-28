@@ -10,11 +10,11 @@ class Job:
         self.executionTime -= 1
 
     def __gt__(self, other):
-        if self.task.number == other.task.number:
+        if self.task.priority == other.task.priority:
             return self.number > other.number
-        return self.task.number > other.task.number
+        return self.task.priority > other.task.priority
 
     def __eq__(self, other):
-        if self.task.number == other.task.number:
+        if self.task.priority == other.task.priority:
             return self.number == other.number
         return False

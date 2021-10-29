@@ -16,8 +16,8 @@ class Scheduler:
         self.endOfFeasibilityInterval = maxOffset + (2 * hyperPeriod)
         self.schedulerArray = [UnitOfTime(i) for i in range(self.endOfFeasibilityInterval)]
         for i in range(1, len(tasks) + 1):
-            self.tasks[i-1].priority = i
-            self.jobsByTask[self.tasks[i-1]] = queue.Queue()
+            self.tasks[i - 1].priority = i
+            self.jobsByTask[self.tasks[i - 1]] = queue.Queue()
 
     def schedule(self):
         i = 0
@@ -52,37 +52,49 @@ class Scheduler:
         colors = ['red', 'blue', 'green', 'yellow', 'orange']
         for i in range(len(self.tasks)):
             self.tasks[i].color = colors[i % len(colors)]
-        fig, gnt = plt.subplots()
-        gnt.set_xlabel('Time')
-        gnt.grid(axis='x')
-        gnt.set_yticks(np.arange(13, 13 * len(self.tasks), 10))
-        gnt.set_yticklabels(t.name for t in self.tasks)
-        plt.xticks(np.arange(0, len(self.schedulerArray) + 1, 10))
+        fig, ax = plt.subplots()
+        ax.set_xlabel('Time')
+        ax.grid(axis='x')
+        ax.set_yticks(np.arange(13, 13 * len(self.tasks), 10))
+        ax.set_yticklabels(t.name for t in self.tasks)
+        plt.xticks(np.arange(0, len(self.schedulerArray) + 1, gcd(self.tasks)))
+        deadlineMissed = False
         previousTask = None
         start = 0
         i = 0
         while i < self.endOfFeasibilityInterval:
             for task in self.schedulerArray[i].tasksDeadlineMissed:
-                dl = plt.Circle((self.schedulerArray[i].index, 13 * task.number), 2, color='black')
-                gnt.add_patch(dl)
+                dl = plt.Circle((self.schedulerArray[i].index, 13 * task.number), 1.5, color='black')
+                ax.add_patch(dl)
+                deadlineMissed = True
 
             currentTask = self.schedulerArray[i].isAssignedFor
             if previousTask is None:
                 previousTask = currentTask
                 start = self.schedulerArray[i].index
             elif previousTask is not currentTask:
-                gnt.broken_barh([(start, self.schedulerArray[i].index - start)], (previousTask.number * 10, 7),
-                                facecolors=previousTask.color)
+                ax.broken_barh([(start, self.schedulerArray[i].index - start)], (previousTask.number * 10, 7),
+                               facecolors=previousTask.color)
                 start = self.schedulerArray[i].index
                 previousTask = currentTask
             i += 1
-        plt.legend(['Deadline missed'])
+
+        if deadlineMissed:
+            plt.legend(['Deadline missed'])
         plt.show()
 
 
-# function to calculate LCM of a tasks array
+# function to calculate LCM of each period from tasks array
 def lcm(tasksArray):
     lcm = tasksArray[0].period
     for i in range(1, len(tasksArray)):
         lcm = lcm * tasksArray[i].period // math.gcd(lcm, tasksArray[i].period)
     return lcm
+
+
+# function to calculate LCM of each period from tasks array
+def gcd(tasksArray):
+    pgcd = tasksArray[0].wcet
+    for i in range(1, len(tasksArray)):
+        pgcd = math.gcd(pgcd, tasksArray[i].wcet)
+    return pgcd

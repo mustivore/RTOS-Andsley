@@ -9,7 +9,7 @@ class Audsley:
     def assign_priority(self, tasks):
 
         if len(tasks) == 1:  # Feasible
-            print("A FTP assignment has been found!!!")
+            print("A FTP assignment has been found !")
             self.solution.append(tasks[0])
             f = open("audsley.txt", "w")
             size = len(self.solution)
@@ -34,7 +34,7 @@ class Audsley:
                     break
                 else:
                     if i == len(tasks):  # Not Feasible
-                        print("there is no lowest-priority viable task!!!")
+                        print("There is no lowest-priority viable task !")
                         return False
                     tasks[-1].typeOfDeadline = 'soft'
                     # swap 2 tasks

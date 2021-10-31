@@ -23,23 +23,28 @@ class Scheduler:
     def schedule(self):
         i = 0
         while i < self.endOfFeasibilityInterval:
-            for task in self.tasks:
+            for task in self.tasks:  # For each task we are doing some stuff
+
+                # Test if we reached a period. If True then create a new job
                 if ((i - task.offset) % task.period) == 0 and i >= task.offset:
                     job = task.createNewJob(i)
                     self.jobQueue.put(job)
                     self.jobsByTask[task].put(job)
 
                 if not self.jobsByTask[task].empty():
-                    job = self.jobsByTask[task].queue[0]
+                    job = self.jobsByTask[task].queue[0]  # Test if the job reached his absolute deadline
                     if i == job.deadline:
                         self.schedulerArray[i].addNewTaskToDeadlineMissed(task)
-                        if task.typeOfDeadline == 'hard':
+                        if task.typeOfDeadline == 'hard':  # If it's a hard deadline we stop the simulator
                             print(task.name, 'miss a hard deadline at time', i)
                             return False
                         else:
                             print(task.name, 'miss a soft deadline at time', i)
 
             if not self.jobQueue.empty():
+                # Peek the first element of the job queue
+                # (according to the priority => see the method __gt__ in the Job's class)
+                # which should be assigned to the UnitOfTime
                 job = self.jobQueue.queue[0]
                 job.decreaseExecutionTime()
                 self.schedulerArray[i].setIsAssignedFor(job.task)
@@ -59,7 +64,7 @@ class Scheduler:
         ax.grid(axis='x')
         ax.set_yticks(np.arange(13, 13 * len(self.tasks), 10))
         ax.set_yticklabels(t.name for t in self.tasks)
-        plt.xticks(np.arange(0, len(self.schedulerArray) + 1, gcd(self.tasks)))
+        plt.xticks(np.arange(0, len(self.schedulerArray), gcd(self.tasks)))
         deadlineMissed = False
         previousTask = None
         start = 0

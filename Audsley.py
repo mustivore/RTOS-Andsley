@@ -15,7 +15,7 @@ class Audsley:
             f = open("audsley.txt", "w")
             size = len(self.solution)
             i = 0
-            while i < size:
+            while i < size:  # Write into the audsley.txt file the priority assignment found
                 task = self.solution.pop()
                 f.write(str(task.offset) + " " + str(task.wcet) + " " + str(task.deadline) + " " +
                         str(task.period) + " " + "\n")
@@ -24,17 +24,19 @@ class Audsley:
             return True
         else:
             for i in range(1, len(tasks) + 1):
-                tasks[-1].typeOfDeadline = 'hard'
+                tasks[-1].typeOfDeadline = 'hard'  # Define a task as the lowest-priority viable task
                 scheduler = Scheduler(tasks)
                 print("Test", tasks[- 1].name, "as the lowest-priority viable task")
                 if scheduler.schedule():
                     print(tasks[- 1].name, "is the lowest-priority viable task")
                     self.solution.append(tasks[-1])
                     tasks.pop()
-                    self.assign_priority(tasks)
+                    self.assign_priority(tasks)  # Call audsley without the lowest-priority viable task
                     break
                 else:
-                    if i == len(tasks):  # Not Feasible
+                    if i == len(tasks):
+                        # Not Feasible because we have tested all tasks as the lowest-priority
+                        # viable task and they missed a hard deadline
                         print("There is no lowest-priority viable task !")
                         return False
                     tasks[-1].typeOfDeadline = 'soft'

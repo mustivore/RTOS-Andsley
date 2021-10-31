@@ -30,7 +30,7 @@ def parseTextFileToTasksArray(filename, typeOfDeadline):
             utilization += task.wcet / task.period
             task_index += 1
 
-    if utilization > 1:
+    if utilization > 1:  # If the utilisation of the CPU is > than 100% then it's not schedulelable
         print("Utilization is greater than 1")
         sys.exit(-1)
     return tasks
@@ -41,11 +41,11 @@ if __name__ == "__main__":
     length = len(sys.argv)
 
     if length == 3 and os.path.isfile(sys.argv[2]):
-        if sys.argv[1] == 'audsley':
+        if sys.argv[1] == 'audsley':  # call to Audsley algorithm
             tasks = parseTextFileToTasksArray(sys.argv[2], 'soft')
             audsley = Audsley()
             audsley.assign_priority(tasks)
-        elif sys.argv[1] == 'scheduler':
+        elif sys.argv[1] == 'scheduler':  # call to the FTP scheduler simulator and plot
             tasks = parseTextFileToTasksArray(sys.argv[2], 'hard')
             scheduler = Scheduler(tasks)
             scheduler.schedule()

@@ -7,10 +7,11 @@ from Task import Task
 from Scheduler import Scheduler
 
 
+# function that shows a error message
 def showUsageError():
     return 'usage error : main.py [audsley|scheduler] <task_file> '
 
-
+# function that transforms a text file into an array of tasks.
 def parseTextFileToTasksArray(filename, typeOfDeadline):
     tasks = []
     utilization = 0
@@ -25,8 +26,10 @@ def parseTextFileToTasksArray(filename, typeOfDeadline):
             task = Task(task_index, int(line_split[0]), int(line_split[1]),
                         int(line_split[2]), int(line_split[3]), typeOfDeadline)
             tasks.append(task)
+            # calculates the utilization
             utilization += task.wcet / task.period
             task_index += 1
+
     if utilization > 1:
         print("Utilization is greater than 1")
         sys.exit(-1)

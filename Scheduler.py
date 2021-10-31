@@ -19,6 +19,7 @@ class Scheduler:
             self.tasks[i - 1].priority = i
             self.jobsByTask[self.tasks[i - 1]] = queue.Queue()
 
+    # function that simulates an ftp scheduler
     def schedule(self):
         i = 0
         while i < self.endOfFeasibilityInterval:
@@ -48,6 +49,7 @@ class Scheduler:
             i += 1
         return True
 
+    # function that draws the graph representing the ordering of the tasks.
     def plot(self):
         colors = ['red', 'blue', 'green', 'yellow', 'orange']
         for i in range(len(self.tasks)):

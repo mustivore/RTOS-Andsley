@@ -6,6 +6,7 @@ class Audsley:
     def __init__(self):
         self.solution = []
 
+    # function that allows us to find a priority assignment for a set of tasks
     def assign_priority(self, tasks):
 
         if len(tasks) == 1:  # Feasible
